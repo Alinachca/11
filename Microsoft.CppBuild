@@ -1,0 +1,217 @@
+#ifndef EMPLOYEE_H
+#define EMPLOYEE_H
+
+struct Employee {
+char lastName[50];
+char firstName[50];
+char phone[15];
+double salary;
+};
+
+// Функции для работы с информационной книгой
+void loadFromFile(Employee employees[], int& count, const char* filename);
+void saveToFile(const Employee employees[], int count, const char* filename);
+void displayAllEmployees(const Employee employees[], int count);
+void searchByLastName(const Employee employees[], int count, const char* lastName);
+void searchBySalaryRange(const Employee employees[], int count, double minSalary, double maxSalary);
+void sortByLastName(Employee employees[], int count);
+void addEmployee(Employee employees[], int& count);
+void deleteEmployee(Employee employees[], int& count);
+
+bool isValidPhone(const char* phone);
+void confirmAndDelete(Employee employees[], int& count, int index);
+
+#endif
+
+
+#include "employee.h"
+#include <fstream>
+	#include <cstring>
+
+		void loadFromFile(Employee employees[], int& count, const char* filename) {
+		std::ifstream file(filename);
+		if (file.is_open()) {
+		while (file >> employees[count].lastName >> employees[count].firstName
+		>> employees[count].phone >> employees[count].salary) {
+		++count;
+		}
+		file.close();
+		}
+		}
+
+		void saveToFile(const Employee employees[], int count, const char* filename) {
+		std::ofstream file(filename);
+		if (file.is_open()) {
+		for (int i = 0; i < count; ++i) {
+            file << employees[i].lastName << " " << employees[i].firstName << " "
+                 << employees[i].phone << " " << employees[i].salary << std::endl;
+        }
+        file.close();
+    }
+}
+
+void displayAllEmployees(const Employee employees[], int count) {
+    for (int i = 0; i < count; ++i) {
+        printf("Фамилия: %s, Имя: %s, Телефон: %s, Зарплата: %.2f\n",
+               employees[i].lastName, employees[i].firstName, employees[i].phone, employees[i].salary);
+    }
+}
+
+void searchByLastName(const Employee employees[], int count, const char* lastName) {
+    for (int i = 0; i < count; ++i) {
+        if (strcmp(employees[i].lastName, lastName) == 0) {
+            printf("Фамилия: %s, Имя: %s, Телефон: %s, Зарплата: %.2f\n",
+                   employees[i].lastName, employees[i].firstName, employees[i].phone, employees[i].salary);
+        }
+    }
+}
+
+void searchBySalaryRange(const Employee employees[], int count, double minSalary, double maxSalary) {
+    for (int i = 0; i < count; ++i) {
+        if (employees[i].salary >= minSalary && employees[i].salary <= maxSalary) {
+		printf("Фамилия: %s, Имя: %s, Телефон: %s, Зарплата: %.2f\n",
+		employees[i].lastName, employees[i].firstName, employees[i].phone, employees[i].salary);
+		}
+		}
+		}
+
+		void sortByLastName(Employee employees[], int count) {
+		for (int i = 0; i < count - 1; ++i) {
+        for (int j = i + 1; j < count; ++j) {
+            if (strcmp(employees[i].lastName, employees[j].lastName) > 0) {
+                Employee temp = employees[i];
+                employees[i] = employees[j];
+                employees[j] = temp;
+            }
+        }
+    }
+}
+
+void addEmployee(Employee employees[], int& count) {
+    printf("Введите фамилию: ");
+    scanf("%s", employees[count].lastName);
+    printf("Введите имя: ");
+    scanf("%s", employees[count].firstName);
+    
+    do {
+        printf("Введите телефон (формат: (063) 5635904): ");
+        scanf("%s", employees[count].phone);
+    } while (!isValidPhone(employees[count].phone));
+    
+    printf("Введите зарплату: ");
+    scanf("%lf", &employees[count].salary);
+
+		++count;
+		}
+
+		void deleteEmployee(Employee employees[], int& count) {
+		char lastName[50];
+		printf("Введите фамилию сотрудника, которого хотите удалить: ");
+		scanf("%s", lastName);
+
+		int index = -1;
+		for (int i = 0; i < count; ++i) {
+        if (strcmp(employees[i].lastName, lastName) == 0) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index != -1) {
+        confirmAndDelete(employees, count, index);
+    } else {
+        printf("Сотрудник не найден!\n");
+    }
+}
+
+bool isValidPhone(const char* phone) {
+    return (phone[0] == '(' && phone[4] == ')' && phone[5] == ' ' && phone[8] == ' ' &&
+		phone[9] != '\0' && phone[13] == '\0');
+		}
+
+		void confirmAndDelete(Employee employees[], int& count, int index) {
+		char confirmation[4];
+		printf("Вы уверены, что хотите удалить сотрудника? (да/нет): ");
+		scanf("%s", confirmation);
+
+		if (strcmp(confirmation, "да") == 0) {
+		for (int i = index; i < count - 1; ++i) {
+            employees[i] = employees[i + 1];
+        }
+        --count;
+        printf("Сотрудник удален!\n");
+    } else {
+        printf("Удаление отменено.\n");
+    }
+}
+			
+			
+			
+			#include "employee.h"
+#include <cstdio>
+
+int main() {
+    Employee employees[100];
+    int count = 0;
+    int choice;
+
+    while (true) {
+        printf("\nМеню:\n");
+        printf("1. Загрузить информацию из файла\n");
+        printf("2. Сохранить информацию в файл\n");
+        printf("3. Показать всех сотрудников\n");
+        printf("4. Поиск по фамилии\n");
+        printf("5. Поиск по диапазону зарплат\n");
+        printf("6. Сортировка по фамилии\n");
+        printf("7. Добавить сотрудника\n");
+        printf("8. Удалить сотрудника\n");
+        printf("0. Выход\n");
+        printf("Выберите действие: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                loadFromFile(employees, count, "employees.txt");
+                break;
+            case 2:
+                saveToFile(employees, count, "employees.txt");
+                break;
+            case 3:
+                displayAllEmployees(employees, count);
+                break;
+            case 4: {
+                char lastName[50];
+                printf("Введите фамилию для поиска: ");
+                scanf("%s", lastName);
+                searchByLastName(employees, count, lastName);
+                break;
+            }
+            case 5: {
+                double minSalary, maxSalary;
+                printf("Введите минимальную зарплату: ");
+                scanf("%lf", &minSalary);
+                printf("Введите максимальную зарплату: ");
+                scanf("%lf", &maxSalary);
+                searchBySalaryRange(employees, count, minSalary, maxSalary);
+                break;
+            }
+            case 6:
+                sortByLastName(employees, count);
+                break;
+            case 7:
+                addEmployee(employees, count);
+                break;
+            case 8:
+                deleteEmployee(employees, count);
+                break;
+            case 0:
+                printf("Выход из программы...\n");
+                return 0;
+            default:
+                printf("Неверный выбор. Попробуйте снова.\n");
+                break;
+        }
+    }
+
+    return 0;
+}
